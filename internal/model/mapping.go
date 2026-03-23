@@ -12,6 +12,8 @@ var BaseModelMapping = map[string]string{
 	"glm-4.6-v":    "glm-4.6v",
 	"glm-4.5-air":  "0727-106B-API",
 	"0808-360b-dr": "0808-360B-DR",
+	"GLM-5-Turbo":  "GLM-5-Turbo",
+
 }
 
 // Claude 模型名到 GLM 基础模型名的映射
