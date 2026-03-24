@@ -17,13 +17,13 @@ var BaseModelMapping = map[string]string{
 
 // Claude 模型名到 GLM 基础模型名的映射
 var ClaudeModelMapping = map[string]string{
-	"claude-opus-4-6":            "glm-4.7",
-	"claude-opus-4-5-20250514":   "glm-4.7",
-	"claude-sonnet-4-6":          "glm-4.7",
-	"claude-sonnet-4-5-20241022": "glm-4.7",
+	"claude-opus-4-6":            "glm-5",
+	"claude-opus-4-5-20250514":   "glm-5",
+	"claude-sonnet-4-6":          "glm-5",
+	"claude-sonnet-4-5-20241022": "glm-5",
 	"claude-haiku-4-5":           "glm-4.5-air",
 	"claude-haiku-4-5-20251001":  "glm-4.5-air",
-	"claude-3-5-sonnet-20241022": "glm-4.7",
+	"claude-3-5-sonnet-20241022": "glm-5",
 	"claude-3-5-haiku-20241022":  "glm-4.5-air",
 }
 
