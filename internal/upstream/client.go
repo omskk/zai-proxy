@@ -244,6 +244,17 @@ func MakeUpstreamRequest(token string, messages []model.Message, modelName strin
 	req.Header.Set("Referer", fmt.Sprintf("https://chat.z.ai/c/%s", uuid.New().String()))
 	req.Header.Set("User-Agent", uarand.GetRandom())
 
+	// Browser simulation headers
+	req.Header.Set("sec-ch-ua", `"Chromium";v="146", "Not-A.Brand";v="24", "Google Chrome";v="146"`)
+	req.Header.Set("sec-ch-ua-mobile", "?0")
+	req.Header.Set("sec-ch-ua-platform", `"macOS"`)
+	req.Header.Set("sec-fetch-dest", "empty")
+	req.Header.Set("sec-fetch-mode", "cors")
+	req.Header.Set("sec-fetch-site", "same-origin")
+	req.Header.Set("accept-language", "zh-CN")
+	req.Header.Set("accept-encoding", "gzip, deflate, br, zstd")
+	req.Header.Set("priority", "u=1, i")
+
 	client := proxy.GetHTTPClient()
 	resp, err := client.Do(req)
 	if err != nil {
