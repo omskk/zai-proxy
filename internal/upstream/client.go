@@ -252,7 +252,7 @@ func MakeUpstreamRequest(token string, messages []model.Message, modelName strin
 	req.Header.Set("sec-fetch-mode", "cors")
 	req.Header.Set("sec-fetch-site", "same-origin")
 	req.Header.Set("accept-language", "zh-CN")
-	req.Header.Set("accept-encoding", "gzip, deflate, br, zstd")
+	// req.Header.Set("accept-encoding", "gzip, deflate, br, zstd")
 	req.Header.Set("priority", "u=1, i")
 
 	client := proxy.GetHTTPClient()
