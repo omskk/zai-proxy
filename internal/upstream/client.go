@@ -5,11 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
-
-	"github.com/corpix/uarand"
-	"github.com/google/uuid"
 
 	"zai-proxy/internal/auth"
 	"zai-proxy/internal/logger"
@@ -17,6 +15,9 @@ import (
 	"zai-proxy/internal/proxy"
 	builtintools "zai-proxy/internal/tools"
 	"zai-proxy/internal/version"
+
+	"github.com/corpix/uarand"
+	"github.com/google/uuid"
 )
 
 func ExtractLatestUserContent(messages []model.Message) string {
@@ -56,11 +57,51 @@ func MakeUpstreamRequest(token string, messages []model.Message, modelName strin
 
 	signature := auth.GenerateSignature(userID, requestID, latestUserContent, timestamp)
 
-	url := fmt.Sprintf("https://chat.z.ai/api/v2/chat/completions?timestamp=%d&requestId=%s&user_id=%s&version=0.0.1&platform=web&token=%s&current_url=%s&pathname=%s&signature_timestamp=%d",
-		timestamp, requestID, userID, token,
-		fmt.Sprintf("https://chat.z.ai/c/%s", chatID),
-		fmt.Sprintf("/c/%s", chatID),
-		timestamp)
+	// 完整的浏览器指纹参数
+	userAgent := "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+	now := time.Now()
+	utcTime := now.UTC().Format("Mon, 02 Jan 2006 15:04:05 GMT")
+	localTime := now.Format("2006-01-02T15:04:05.000Z")
+	timezoneOffset := -480 // Asia/Shanghai offset in minutes
+
+	params := url.Values{}
+	params.Set("timestamp", fmt.Sprintf("%d", timestamp))
+	params.Set("requestId", requestID)
+	params.Set("user_id", userID)
+	params.Set("version", "0.0.1")
+	params.Set("platform", "web")
+	params.Set("token", token)
+	params.Set("user_agent", userAgent)
+	params.Set("language", "zh-CN")
+	params.Set("languages", "zh-CN,en-US,zh,en")
+	params.Set("timezone", "Asia/Shanghai")
+	params.Set("timezone_offset", fmt.Sprintf("%d", timezoneOffset))
+	params.Set("local_time", localTime)
+	params.Set("utc_time", utcTime)
+	params.Set("cookie_enabled", "true")
+	params.Set("screen_width", "1920")
+	params.Set("screen_height", "1080")
+	params.Set("screen_resolution", "1920x1080")
+	params.Set("viewport_height", "713")
+	params.Set("viewport_width", "428")
+	params.Set("viewport_size", "428x713")
+	params.Set("color_depth", "24")
+	params.Set("pixel_ratio", "1")
+	params.Set("is_mobile", "false")
+	params.Set("is_touch", "false")
+	params.Set("max_touch_points", "0")
+	params.Set("browser_name", "Chrome")
+	params.Set("os_name", "Mac OS")
+	params.Set("current_url", fmt.Sprintf("https://chat.z.ai/c/%s", chatID))
+	params.Set("pathname", fmt.Sprintf("/c/%s", chatID))
+	params.Set("host", "chat.z.ai")
+	params.Set("hostname", "chat.z.ai")
+	params.Set("protocol", "https:")
+	params.Set("referrer", "")
+	params.Set("title", "Z.ai - Free AI Chatbot & Agent powered by GLM-5.1 & GLM-5")
+	params.Set("signature_timestamp", fmt.Sprintf("%d", timestamp))
+
+	requestURL := fmt.Sprintf("https://chat.z.ai/api/v2/chat/completions?%s", params.Encode())
 
 	enableThinking := model.IsThinkingModel(modelName)
 	autoWebSearch := model.IsSearchModel(modelName)
@@ -230,7 +271,7 @@ func MakeUpstreamRequest(token string, messages []model.Message, modelName strin
 		}
 	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewReader(bodyBytes))
+	req, err := http.NewRequest("POST", requestURL, bytes.NewReader(bodyBytes))
 	if err != nil {
 		return nil, "", err
 	}
@@ -252,7 +293,7 @@ func MakeUpstreamRequest(token string, messages []model.Message, modelName strin
 	req.Header.Set("sec-fetch-mode", "cors")
 	req.Header.Set("sec-fetch-site", "same-origin")
 	req.Header.Set("accept-language", "zh-CN")
-	// req.Header.Set("accept-encoding", "gzip, deflate, br, zstd")
+	//req.Header.Set("accept-encoding", "gzip, deflate, br, zstd")
 	req.Header.Set("priority", "u=1, i")
 
 	client := proxy.GetHTTPClient()
